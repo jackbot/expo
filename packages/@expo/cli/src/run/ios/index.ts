@@ -1,20 +1,32 @@
 #!/usr/bin/env node
+import arg from 'arg';
 import chalk from 'chalk';
 
 import { Command } from '../../../bin/cli';
 import * as Log from '../../log';
-import { assertArgs, getProjectRoot } from '../../utils/args';
+import {
+  assertArgs,
+  assertWithOptionsArgs,
+  getProjectRoot,
+  isBoolOrString,
+} from '../../utils/args';
 import { logCmdError } from '../../utils/errors';
 
 export const expoRunIos: Command = async (argv) => {
-  const args = assertArgs(
+  const args = assertWithOptionsArgs(
     {
       // Types
       '--help': Boolean,
       '--no-build-cache': Boolean,
       '--no-install': Boolean,
       '--no-bundler': Boolean,
-      '--device': String,
+      '--device': Boolean,
+      // '--device': arg.flag((...foo: any[]) => {
+      //   const argIndex = process.argv.findIndex((arg) => '--device' === arg || '-d' === arg);
+      //   const nextArg = process.argv[argIndex + 1];
+      //   console.log(foo, argIndex, nextArg);
+      //   return undefined;
+      // }),
       '--scheme': String,
       '--configuration': String,
       '--port': Number,
@@ -23,7 +35,11 @@ export const expoRunIos: Command = async (argv) => {
       '-d': '--device',
       '-h': '--help',
     },
-    argv
+    {
+      argv,
+      stopAtPositional: false,
+      permissive: true,
+    }
   );
 
   if (args['--help']) {

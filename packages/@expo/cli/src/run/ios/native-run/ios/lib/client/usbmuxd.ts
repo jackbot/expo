@@ -9,6 +9,7 @@ import plist from '@expo/plist';
 import Debug from 'debug';
 import * as net from 'net';
 
+import { CommandError } from '../../../../../../utils/errors';
 import { parsePlistBuffer } from '../../../../../../utils/plist';
 import { UsbmuxProtocolClient } from '../protocol/usbmux';
 import { ResponseError, ServiceClient } from './client';
@@ -121,7 +122,7 @@ export class UsbmuxdClient extends ServiceClient<UsbmuxProtocolClient> {
     const devices = await this.getDevices();
 
     if (!devices.length) {
-      throw new Error('No devices found');
+      throw new CommandError('APPLE_DEVICE', 'No devices found');
     }
 
     if (!udid) {
@@ -134,7 +135,7 @@ export class UsbmuxdClient extends ServiceClient<UsbmuxProtocolClient> {
       }
     }
 
-    throw new Error(`No device with udid ${udid} found`);
+    throw new CommandError('APPLE_DEVICE', `No device with udid ${udid} found`);
   }
 
   async readPairRecord(udid: string): Promise<UsbmuxdPairRecord> {

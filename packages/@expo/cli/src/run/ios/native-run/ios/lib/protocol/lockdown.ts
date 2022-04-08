@@ -10,6 +10,7 @@ import plist from '@expo/plist';
 import Debug from 'debug';
 import type * as net from 'net';
 
+import { CommandError } from '../../../../../../utils/errors';
 import { IOSLibError } from '../lib-errors';
 import type { ProtocolWriter } from './protocol';
 import { PlistProtocolReader, ProtocolClient, ProtocolReaderFactory } from './protocol';
@@ -81,10 +82,10 @@ export class LockdownProtocolReader extends PlistProtocolReader {
           errorMessage +=
             '\nTry reconnecting your device. You can also debug service logs with `export DEBUG=expo:xdl:ios:*`';
         }
-        throw new Error(errorMessage);
+        throw new CommandError('APPLE_DEVICE', errorMessage);
       }
 
-      throw new Error(resp.Error);
+      throw new CommandError('APPLE_DEVICE', resp.Error);
     }
     return resp;
   }

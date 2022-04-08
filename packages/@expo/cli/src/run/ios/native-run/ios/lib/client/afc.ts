@@ -14,6 +14,7 @@ import { promisify } from 'util';
 import { AFC_FILE_OPEN_FLAGS, AFC_OPS, AFC_STATUS, AFCProtocolClient } from '../protocol/afc';
 import type { AFCError, AFCResponse } from '../protocol/afc';
 import { ServiceClient } from './client';
+import { CommandError } from '../../../../../../utils/errors';
 
 const debug = Debug('expo:apple:usbmuxd:client:afc');
 const MAX_OPEN_FILES = 240;
@@ -73,7 +74,8 @@ export class AFCClient extends ServiceClient<AFCProtocolClient> {
       return resp.data;
     }
 
-    throw new Error(
+    throw new CommandError(
+      'APPLE_DEVICE',
       `There was an unknown error opening file ${path}, response: ${Array.prototype.toString.call(
         resp.data
       )}`

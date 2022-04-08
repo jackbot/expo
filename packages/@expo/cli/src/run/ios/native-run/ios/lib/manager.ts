@@ -9,6 +9,7 @@
 import type * as net from 'net';
 import { Duplex } from 'stream';
 import * as tls from 'tls';
+import { CommandError } from '../../../../../utils/errors';
 
 import type { ServiceClient } from './client';
 import { AFCClient } from './client/afc';
@@ -114,7 +115,9 @@ export class ClientManager {
 
         await new Promise<void>((resolve, reject) => {
           const timeoutId = setTimeout(() => {
-            reject(new Error('The TLS handshake failed to complete after 5s.'));
+            reject(
+              new CommandError('APPLE_DEVICE', 'The TLS handshake failed to complete after 5s.')
+            );
           }, 5000);
           tls.connect(tlsOptions, function (this: tls.TLSSocket) {
             clearTimeout(timeoutId);
@@ -150,7 +153,7 @@ class UsbmuxdProxy extends Duplex {
   constructor(private usbmuxdSock: net.Socket) {
     super();
 
-    this.usbmuxdSock.on('data', data => {
+    this.usbmuxdSock.on('data', (data) => {
       this.push(data);
     });
   }

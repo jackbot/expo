@@ -17,7 +17,7 @@ export async function startBundlerAsync(
   const devServerManager = new DevServerManager(projectRoot, options);
 
   await devServerManager.startAsync([
-    { type: 'metro', options: { headless, devClient: true, location: {} } },
+    { type: 'metro', options: { headless, devClient: true, port, location: {} } },
   ]);
 
   // Present the Terminal UI.

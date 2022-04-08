@@ -7,6 +7,7 @@
  */
 import Debug from 'debug';
 import type * as net from 'net';
+import { CommandError } from '../../../../../../utils/errors';
 
 import type { ProtocolReaderCallback, ProtocolWriter } from './protocol';
 import { ProtocolClient, ProtocolReader, ProtocolReaderFactory } from './protocol';
@@ -67,7 +68,7 @@ export class GDBProtocolReader extends ProtocolReader {
 
   parseHeader(data: Buffer) {
     if (data[0] !== ACK_SUCCESS) {
-      throw new Error('Unsuccessful debugserver response');
+      throw new CommandError('APPLE_DEVICE', 'Unsuccessful debugserver response');
     } // TODO: retry?
     return -1;
   }
@@ -82,10 +83,13 @@ export class GDBProtocolReader extends ProtocolReader {
       if (validateChecksum(checksum, msg)) {
         return msg;
       } else {
-        throw new Error('Invalid checksum received from debugserver');
+        throw new CommandError(
+          'APPLE_DEVICE',
+          `Invalid checksum received from debugserver. (checksum: ${checksum}, msg: ${msg})`
+        );
       }
     } else {
-      throw new Error("Didn't receive checksum");
+      throw new CommandError('APPLE_DEVICE', "Didn't receive checksum");
     }
   }
 }

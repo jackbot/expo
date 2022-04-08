@@ -8,6 +8,7 @@
 import Debug from 'debug';
 import type * as net from 'net';
 
+import { CommandError } from '../../../../../../utils/errors';
 import type { ProtocolReaderCallback, ProtocolWriter } from './protocol';
 import { ProtocolClient, ProtocolReader, ProtocolReaderFactory } from './protocol';
 
@@ -377,7 +378,7 @@ export class AFCProtocolClient extends ProtocolClient {
         if (isAFCResponse(resp)) {
           resolve(resp);
         } else {
-          reject(new Error('Malformed AFC response'));
+          reject(new CommandError('APPLE_DEVICE', 'Malformed AFC response'));
         }
       };
       this.writer.write(this.socket, { ...msg, requestId });
