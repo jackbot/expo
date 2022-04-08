@@ -8,13 +8,14 @@ import { promptToClearMalformedNativeProjectsAsync } from '../../prebuild/clearN
 import { prebuildAsync } from '../../prebuild/prebuildAsync';
 import { AppleDeviceManager } from '../../start/platforms/ios/AppleDeviceManager';
 import { SimulatorLogStreamer } from '../../start/platforms/ios/simctlLogging';
+import { maybePromptToSyncPodsAsync } from '../../utils/cocoapods';
 import { parsePlistAsync } from '../../utils/plist';
 import { profile } from '../../utils/profile';
 import { getAppDeltaDirectory, installOnDeviceAsync } from './installOnDeviceAsync';
 import * as IOSDeploy from './IOSDeploy';
-import { maybePromptToSyncPodsAsync } from '../../utils/cocoapods';
-import { Options, resolveOptionsAsync } from './resolveOptionsAsync';
+import { resolveOptionsAsync } from './resolveOptionsAsync';
 import { startBundlerAsync } from './startBundlerAsync';
+import { Options } from './XcodeBuild.types';
 import * as XcodeBuild from './XcodeBuild';
 
 export async function runIosAsync(projectRoot: string, options: Options) {
