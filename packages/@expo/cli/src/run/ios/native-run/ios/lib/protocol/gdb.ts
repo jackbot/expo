@@ -7,11 +7,12 @@
  */
 import Debug from 'debug';
 import type * as net from 'net';
-import { CommandError } from '../../../../../../utils/errors';
 
-import type { ProtocolReaderCallback, ProtocolWriter } from './protocol';
+import { CommandError } from '../../../../../../utils/errors';
+import { IOSLibError } from '../lib-errors';
 import { ProtocolClient, ProtocolReader, ProtocolReaderFactory } from './protocol';
 
+import type { ProtocolReaderCallback, ProtocolWriter } from './protocol';
 const debug = Debug('expo:apple:usbmuxd:protocol:gdb');
 const ACK_SUCCESS = '+'.charCodeAt(0);
 
@@ -82,6 +83,13 @@ export class GDBProtocolReader extends ProtocolReader {
       const msg = buffer.slice(1, -3).toString();
       if (validateChecksum(checksum, msg)) {
         return msg;
+      } else if (msg.startsWith('E')) {
+        if (msg.match(/the device was not, or could not be, unlocked/)) {
+          throw new IOSLibError('Device is currently locked.', 'DeviceLocked');
+        }
+
+        // Error message from debugserver -- Drop the `E`
+        return msg.slice(1);
       } else {
         throw new CommandError(
           'APPLE_DEVICE',
@@ -123,11 +131,11 @@ function calculateChecksum(cmdStr: string) {
   return result;
 }
 
-function validateChecksum(checksum: string, msg: string) {
+export function validateChecksum(checksum: string, msg: string) {
   // remove '#' from checksum
-  const checksumVal = checksum.slice(1);
+  const checksumVal = checksum.startsWith('#') ? checksum.slice(1) : checksum;
   // remove '$' from msg and calculate its checksum
   const computedChecksum = calculateChecksum(msg);
-  debug(`Checksum: ${checksumVal}, computed checksum: ${computedChecksum}`);
+  // debug(`Checksum: ${checksumVal}, computed checksum: ${computedChecksum}`);
   return checksumVal === computedChecksum;
 }
