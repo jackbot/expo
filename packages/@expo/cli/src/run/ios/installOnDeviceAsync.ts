@@ -1,8 +1,14 @@
+import chalk from 'chalk';
+import { Ora } from 'ora';
 import os from 'os';
 import path from 'path';
 
 import { ensureDirectory } from '../../utils/dir';
-import * as IOSDeploy from './IOSDeploy';
+import { CI } from '../../utils/env';
+import { CommandError } from '../../utils/errors';
+import { ora } from '../../utils/ora';
+import { confirmAsync } from '../../utils/prompts';
+import * as AppleDevice from './AppleDevice';
 
 /**
  * Get the app_delta folder for faster subsequent rebuilds on devices.
@@ -25,6 +31,55 @@ export async function installOnDeviceAsync(props: {
   udid: string;
   deviceName: string;
 }): Promise<void> {
-  // TODO: Replace with a fork of `appium-ios-device` or something similar.
-  return await IOSDeploy.installOnDeviceAsync(props);
+  const { bundle, bundleIdentifier, appDeltaDirectory, udid, deviceName } = props;
+  let indicator: Ora | undefined;
+
+  try {
+    // TODO: Connect for logs
+    await AppleDevice.runOnDevice({
+      udid,
+      appPath: bundle,
+      bundleId: bundleIdentifier,
+      waitForApp: false,
+      deltaPath: appDeltaDirectory,
+      onProgress({
+        status,
+        isComplete,
+        progress,
+      }: {
+        status: string;
+        isComplete: boolean;
+        progress: number;
+      }) {
+        if (!indicator) {
+          indicator = ora(status).start();
+        }
+        indicator.text = `${chalk.bold(status)} ${progress}%`;
+        if (isComplete) {
+          indicator.succeed();
+        }
+      },
+    });
+  } catch (err: any) {
+    if (indicator) {
+      indicator.fail();
+    }
+    if (err.code === 'DeviceLocked') {
+      // Get the app name from the binary path.
+      const appName = path.basename(bundle).split('.')[0] ?? 'app';
+      if (
+        !CI &&
+        (await confirmAsync({
+          message: `Cannot launch ${appName} because the device is locked. Unlock ${deviceName} to continue...`,
+          initial: true,
+        }))
+      ) {
+        return installOnDeviceAsync(props);
+      }
+      throw new CommandError(
+        `Cannot launch ${appName} on ${deviceName} because the device is locked.`
+      );
+    }
+    throw err;
+  }
 }

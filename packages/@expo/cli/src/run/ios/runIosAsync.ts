@@ -12,7 +12,6 @@ import { maybePromptToSyncPodsAsync } from '../../utils/cocoapods';
 import { parsePlistAsync } from '../../utils/plist';
 import { profile } from '../../utils/profile';
 import { getAppDeltaDirectory, installOnDeviceAsync } from './installOnDeviceAsync';
-import * as IOSDeploy from './IOSDeploy';
 import { resolveOptionsAsync } from './resolveOptionsAsync';
 import { startBundlerAsync } from './startBundlerAsync';
 import { Options } from './XcodeBuild.types';
@@ -30,11 +29,6 @@ export async function runIosAsync(projectRoot: string, options: Options) {
   await ensureNativeProjectAsync(projectRoot, options.install);
 
   const props = await resolveOptionsAsync(projectRoot, options);
-  if (!props.isSimulator) {
-    // TODO: Replace with JS...
-    // Assert as early as possible
-    await IOSDeploy.assertInstalledAsync();
-  }
 
   const buildOutput = await profile(XcodeBuild.buildAsync, 'XcodeBuild.buildAsync')(props);
 

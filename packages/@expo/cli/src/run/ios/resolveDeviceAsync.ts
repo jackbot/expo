@@ -9,11 +9,25 @@ import { assertSystemRequirementsAsync } from '../../start/platforms/ios/assertS
 import { sortDefaultDeviceToBeginningAsync } from '../../start/platforms/ios/promptAppleDevice';
 import { OSType } from '../../start/platforms/ios/simctl';
 import * as SimControl from '../../start/platforms/ios/simctl';
-import { listDevicesAsync, XCTraceDevice } from '../../start/platforms/ios/xctrace';
+import { XCTraceDevice } from '../../start/platforms/ios/xctrace';
 import { CommandError } from '../../utils/errors';
 import { ora } from '../../utils/ora';
 import { profile } from '../../utils/profile';
 import prompt from '../../utils/prompts';
+import * as AppleDevice from './AppleDevice';
+
+async function listDevicesAsync() {
+  const results = await AppleDevice.getConnectedDevices();
+  // TODO: Add support for osType (ipad, watchos, etc)
+  return results.map((device) => ({
+    // TODO: Better name
+    name: device.DeviceName ?? device.ProductType ?? 'unknown ios device',
+    model: device.ProductType,
+    osVersion: device.ProductVersion,
+    deviceType: 'device',
+    udid: device.UniqueDeviceID,
+  }));
+}
 
 /** Get a list of devices (called destinations) that are connected to the host machine. */
 async function getBuildDestinationsAsync({ osType }: { osType?: OSType } = {}) {
