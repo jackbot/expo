@@ -46,7 +46,7 @@ export async function runIosAsync(projectRoot: string, options: Options) {
   const manager = await startBundlerAsync(projectRoot, {
     port: props.port,
     headless: !props.shouldStartBundler,
-    platforms: exp.platforms,
+    platforms: exp.platforms ?? [],
   });
 
   const appId = await profile(getBundleIdentifierForBinaryAsync)(binaryPath);

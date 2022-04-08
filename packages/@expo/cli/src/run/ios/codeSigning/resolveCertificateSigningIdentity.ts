@@ -81,7 +81,7 @@ export async function resolveCertificateSigningIdentityAsync(
 /** Prompt the user to select a development team, highlighting the preferred value based on the user history. */
 export async function selectDevelopmentTeamAsync(
   identities: Security.CertificateSigningInfo[],
-  preferredId: string
+  preferredId?: string
 ): Promise<Security.CertificateSigningInfo> {
   const index = await selectAsync(
     'Development team for signing the app',
