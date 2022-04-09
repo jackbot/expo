@@ -6,9 +6,9 @@ export type Options = {
   /** Dev server port to use, ignored if `bundler` is `false`. */
   port?: number;
   /** Xcode scheme to build. */
-  scheme?: string;
+  scheme?: string | boolean;
   /** Xcode configuration to build. Default `Debug` */
-  configuration?: XcodeConfiguration;
+  configuration?: string | boolean;
   /** Should start the bundler dev server. */
   bundler?: boolean;
   /** Should install missing dependencies before building. */
